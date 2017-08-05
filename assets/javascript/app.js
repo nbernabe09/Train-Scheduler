@@ -1,69 +1,108 @@
 // Initialize Firebase
 var config = {
-	apiKey: "AIzaSyAudviv7IsHmtQksn9UofBC-9OISb0Ps8M",
-	authDomain: "testdatabase-a03f2.firebaseapp.com",
-	databaseURL: "https://testdatabase-a03f2.firebaseio.com",
-	projectId: "testdatabase-a03f2",
-	storageBucket: "",
-	messagingSenderId: "147137402705"
+  apiKey: "AIzaSyCvkJPJM_Bbh7ScEO2cko4BlGf2n6AnWac",
+  authDomain: "trainscheduler-79d3e.firebaseapp.com",
+  databaseURL: "https://trainscheduler-79d3e.firebaseio.com",
+  projectId: "trainscheduler-79d3e",
+  storageBucket: "trainscheduler-79d3e.appspot.com",
+  messagingSenderId: "83289470867"
 };
 
 firebase.initializeApp(config);
-
 var database = firebase.database();
 
 // Initial Variables
 var tbody = $("table tbody");
-var trains = [];
-var trainCount = 0;
 
 // Functions
-function newTrain() {
-	var train = {
-			name: $("#name-input").val(),
-			destination: $("#destination-input").val(),
-			frequency: $("#frequency-input").val(),
-			time: $("#time-input").val()
-	}
-	trains.push(train);
-	trainCount++;
-	database.ref().set({
-		trains: trains,
-		trainCount: trainCount,
+function train(trainObj) {
+	this.name = trainObj.name;
+	this.destination = trainObj.destination;
+	this.time = trainObj.time;
+	this.frequency = trainObj.frequency;
+}
+
+function newTrain(train) {
+	database.ref().push({
+		trains: train,
+		dateAdded: firebase.database.ServerValue.TIMESTAMP
 	});
+}
+
+function createRow(rowObj) {
+	var newRow = $("<tr>");
+
+	for (prop in rowObj) {
+		var tempTd = $("<td>");
+		var tempVal = $("<p>");
+		tempVal.text(rowObj[prop]);
+		tempTd.append(tempVal);
+		newRow.append(tempTd);
+	}
+
+	tempTd = tempTd = $("<td>");
+	var tempVal = $("<p>");
+	tempVal.html("<button class='btn btn-xs btn-info' id='edit-train'>Edit</button> <button class='btn btn-xs btn-danger' id='delete-train'>Delete</button>");
+	tempTd.append(tempVal);
+	newRow.append(tempTd);
+
+	return newRow;
+}
+
+function addContent(trainCont) {
+	// var mins = minutesPassed(trainCont.start);
+	var rowObj = {
+		name: trainCont.name,
+		destination: trainCont.destination,
+		frequency: trainCont.frequency,
+		arrival: trainCont.time,
+		away: trainCont.time,
+	}
+
+	var tempRow = createRow(rowObj);
+	tbody.append(tempRow);
 }
 
 // Buttons
 $("#add-train").click(function() {
 	event.preventDefault();
-	newTrain();
+	var newT = new train({
+		name: $("#name-input").val(),
+		destination: $("#destination-input").val(),
+		time: $("#time-input").val(),
+		frequency:$("#frequency-input").val()
+	});
+	newTrain(newT);
+
+	database.ref().orderByChild("dateAdded").limitToLast(1).on("child_added", function(snapshot) {
+		var sv = snapshot.val();
+		addContent(sv.trains);
+	}, function(errorObject) {
+	  console.log("The read failed: " + errorObject.code);
+	});
 });
+
+$(document).on("click", "#edit-train", function() {
+	alert("This is where it allows you to edit.");
+}),
+
+$(document).on("click", "#delete-train", function() {
+	var deleteTrain = confirm("Are you sure you want to delete?");
+	if (deleteTrain === true) {
+		alert("This is when it deletes the row.")
+	}
+}),
 
 // Firebase Watcher
 database.ref().on("value", function(snapshot) {
-	// showTrain(snapshot);
-	trainCount = snapshot.val().trainCount;
-	trains = snapshot.val().trains;
 	tbody.empty();
-	for (var i = 0; i < trainCount; i++) {
-		var newRow = $("<tr>");
+	var snap = snapshot.val();
 
-		newRow.append($("<td>"));
-		newRow.append($("<td>"));
-		newRow.append($("<td>"));
-		newRow.append($("<td>"));
-		newRow.append($("<td>"));
-
-		var tds = newRow.find("td");
-
-		tds.eq(0).text(snapshot.val().trains[i].name);
-		tds.eq(1).text(snapshot.val().trains[i].destination);
-		tds.eq(2).text(snapshot.val().trains[i].frequency);
-		tds.eq(3).text(snapshot.val().trains[i].time);
-		tds.eq(4).text();
-
-		tbody.append(newRow);
+	for (var prop in snap) {
+		var tempTrains = snap[prop].trains;
+		addContent(tempTrains);
 	}
+
 }, function(errorObject) {
   console.log("The read failed: " + errorObject.code);
 });

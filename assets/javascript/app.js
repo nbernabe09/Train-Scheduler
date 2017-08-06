@@ -49,16 +49,20 @@ function createRow(rowObj) {
 	return newRow;
 }
 
+function addMinutes(time) {
+	var = moment().format("HH:mm")
+}
+
 function addContent(trainCont) {
-	// var mins = minutesPassed(trainCont.start);
 	var rowObj = {
 		name: trainCont.name,
 		destination: trainCont.destination,
 		frequency: trainCont.frequency,
-		arrival: trainCont.time,
-		away: trainCont.time,
+		arrival: moment([trainCont.time], "HH:mm").format("HH:mm"),
+		away: "Add code here...",
 	}
 
+	// rowObj.arrival = moment([rowObj.arrival]).add(trainCont.frequency, "m");
 	var tempRow = createRow(rowObj);
 	tbody.append(tempRow);
 }
@@ -83,7 +87,7 @@ $("#add-train").click(function() {
 });
 
 $(document).on("click", "#edit-train", function() {
-	alert("This is where it allows you to edit.");
+	alert("This is when it allows you to edit.");
 }),
 
 $(document).on("click", "#delete-train", function() {

@@ -49,8 +49,13 @@ function createRow(rowObj) {
 	return newRow;
 }
 
-function addMinutes(time) {
-	var = moment().format("HH:mm")
+function addArrival(time, away) {
+	var now = moment();
+	var firstTime = moment([time], "HH:mm");
+	var convertTime = moment(firstTime, "HH:mm").subtract(1, "y");
+	var diffTime = now.diff(moment(convertTime), "m");
+	var remain = diffTime % away;
+	return away - remain;
 }
 
 function addContent(trainCont) {
@@ -58,11 +63,15 @@ function addContent(trainCont) {
 		name: trainCont.name,
 		destination: trainCont.destination,
 		frequency: trainCont.frequency,
-		arrival: moment([trainCont.time], "HH:mm").format("HH:mm"),
-		away: "Add code here...",
+		arrival: "",
+		away: ""
 	}
 
-	// rowObj.arrival = moment([rowObj.arrival]).add(trainCont.frequency, "m");
+	var until = addArrival(trainCont.time, trainCont.frequency);
+
+	rowObj.arrival = moment().add(until, "m").format("HH:mm");
+	rowObj.away = until;
+
 	var tempRow = createRow(rowObj);
 	tbody.append(tempRow);
 }
@@ -94,6 +103,7 @@ $(document).on("click", "#delete-train", function() {
 	var deleteTrain = confirm("Are you sure you want to delete?");
 	if (deleteTrain === true) {
 		alert("This is when it deletes the row.")
+		// $(this).closest ('tr').remove();
 	}
 }),
 

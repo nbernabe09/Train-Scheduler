@@ -59,18 +59,14 @@ function addArrival(time, away) {
 }
 
 function addContent(trainCont) {
+	var until = addArrival(trainCont.time, trainCont.frequency);
 	var rowObj = {
 		name: trainCont.name,
 		destination: trainCont.destination,
 		frequency: trainCont.frequency,
-		arrival: "",
-		away: ""
+		arrival: moment().add(until, "m").format("HH:mm"),
+		away: until
 	}
-
-	var until = addArrival(trainCont.time, trainCont.frequency);
-
-	rowObj.arrival = moment().add(until, "m").format("HH:mm");
-	rowObj.away = until;
 
 	var tempRow = createRow(rowObj);
 	tbody.append(tempRow);
@@ -103,7 +99,7 @@ $(document).on("click", "#delete-train", function() {
 	var deleteTrain = confirm("Are you sure you want to delete?");
 	if (deleteTrain === true) {
 		alert("This is when it deletes the row.")
-		// $(this).closest ('tr').remove();
+		// $(this).closest('tr').remove();
 	}
 }),
 
